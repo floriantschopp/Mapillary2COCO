@@ -6,11 +6,12 @@ import os
 import re
 import fnmatch
 from PIL import Image
+import ntpath
 import numpy as np
 from pycococreatortools import pycococreatortools
 
-ROOT_DIR = 'train'
-IMAGE_DIR = os.path.join(ROOT_DIR, "shapes_train2018")
+ROOT_DIR = '/home/ftschopp/scratch/mapillary/training/'
+IMAGE_DIR = os.path.join(ROOT_DIR, "images")
 ANNOTATION_DIR = os.path.join(ROOT_DIR, "annotations")
 
 INFO = {
@@ -237,6 +238,10 @@ def filter_for_annotations(root, files, image_filename):
 
     return files
 
+def path_leaf(path):
+    head, tail = ntpath.split(path)
+    return tail or ntpath.basename(head)
+
 def main():
 
     coco_output = {
@@ -249,7 +254,7 @@ def main():
 
     image_id = 1
     segmentation_id = 1
-    
+    np.set_printoptions(precision=8)
     # filter for jpeg images
     for root, _, files in os.walk(IMAGE_DIR):
         image_files = filter_for_jpeg(root, files)
@@ -260,14 +265,16 @@ def main():
             image_info = pycococreatortools.create_image_info(
                 image_id, os.path.basename(image_filename), image.size)
             coco_output["images"].append(image_info)
-
+            print(image_filename)
+            print(image_id)
             # filter for associated png annotations
             for root, _, files in os.walk(ANNOTATION_DIR):
                 annotation_files = filter_for_annotations(root, files, image_filename)
-
+                print(len(annotation_files))
+                print(len(files))
                 # go through each associated annotation
                 for annotation_filename in annotation_files:
-                    print(annotation_filename)
+                    # print(annotation_filename)
                     if 'Bird' in annotation_filename:
                         class_id = 1
                     elif 'Ground_Animal' in annotation_filename:
@@ -341,8 +348,8 @@ def main():
                     elif 'Truck' in annotation_filename:
                         class_id = 36
                     elif 'Wheeled_Slow' in annotation_filename:
-                        class_id = 37
-
+                        class_id = 37 
+                    segmentation_id = files.index(path_leaf(annotation_filename)))
                     category_info = {'id': class_id, 'is_crowd': 'crowd' in image_filename}
                     binary_mask = np.asarray(Image.open(annotation_filename)
                         .convert('1')).astype(np.uint8)
@@ -353,7 +360,6 @@ def main():
 
                     if annotation_info is not None:
                         coco_output["annotations"].append(annotation_info)
-                    segmentation_id = segmentation_id + 1
 
             image_id = image_id + 1
 
