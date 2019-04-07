@@ -10,6 +10,9 @@ import ntpath
 import numpy as np
 from pycococreatortools import pycococreatortools
 
+from multiprocessing import Pool, freeze_support
+import itertools
+
 ROOT_DIR = '/home/ftschopp/scratch/mapillary/training/'
 IMAGE_DIR = os.path.join(ROOT_DIR, "images")
 ANNOTATION_DIR = os.path.join(ROOT_DIR, "annotations")
@@ -354,7 +357,7 @@ def main():
         "images": [],
         "annotations": []
     }
-    pool = Pool()
+    pool = Pool(1)
     np.set_printoptions(precision=8)
     # filter for jpeg images
     for root, _, files in os.walk(IMAGE_DIR):
@@ -370,4 +373,5 @@ def main():
 
 
 if __name__ == "__main__":
+    freeze_support()
     main()
