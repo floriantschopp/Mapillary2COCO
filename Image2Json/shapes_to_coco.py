@@ -246,6 +246,7 @@ def path_leaf(path):
     return tail or ntpath.basename(head)
 
 def process_file(image_filename, image_files):
+    annotations_list = []
     image_id = image_files.index(image_filename)
     image = Image.open(image_filename)
     image_info = pycococreatortools.create_image_info(
@@ -343,7 +344,8 @@ def process_file(image_filename, image_files):
                 imagesize, tolerance=2)
 
             if annotation_info is not None:
-                coco_output["annotations"].append(annotation_info)
+                annotations_list.append(annotation_info)
+    return annotations_list
 
 def process_file_helper(args):
     process_file(*args)
@@ -364,9 +366,9 @@ def main():
         image_files = filter_for_jpeg(root, files)
         
         # go through each image
-        pool.map(process_file_helper, itertools.izip(image_files, 
+        annotations = pool.map(process_file_helper, itertools.izip(image_files, 
         itertools.repeat(image_files)))
-
+        coco_output["annotations"].append(annotations)
 
     with open('{}/instances_shape_train2018.json'.format(ROOT_DIR), 'w') as output_json_file:
         json.dump(coco_output, output_json_file)
