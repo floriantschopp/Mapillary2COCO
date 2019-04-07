@@ -242,96 +242,105 @@ def path_leaf(path):
     head, tail = ntpath.split(path)
     return tail or ntpath.basename(head)
 
-def process_file(files, root, image_filename, file_id, imagesize):
-    annotation_files = filter_for_annotations(root, files, image_filename)
-    # go through each associated annotation
-    for annotation_filename in annotation_files:
-        # print(annotation_filename)
-        if 'Bird' in annotation_filename:
-            class_id = 1
-        elif 'Ground_Animal' in annotation_filename:
-            class_id = 2
-        elif 'Crosswalk_Plain' in annotation_filename:
-            class_id = 3
-        elif 'Person' in annotation_filename:
-            class_id = 4
-        elif 'Bicyclist' in annotation_filename:
-            class_id = 5
-        elif 'Motorcyclist' in annotation_filename:
-            class_id = 6
-        elif 'Other_Rider' in annotation_filename:
-            class_id = 7
-        elif 'Lane_Marking_-_Crosswalk' in annotation_filename:
-            class_id = 8
-        elif 'Banner' in annotation_filename:
-            class_id = 9
-        elif 'Bench' in annotation_filename:
-            class_id = 10
-        elif 'Bike_Rack' in annotation_filename:
-            class_id = 11
-        elif 'Billboard' in annotation_filename:
-            class_id = 12
-        elif 'Catch_Basin' in annotation_filename:
-            class_id = 13
-        elif 'CCTV_Camera' in annotation_filename:
-            class_id = 14
-        elif 'Fire_Hydrant' in annotation_filename:
-            class_id = 15
-        elif 'Junction_Box' in annotation_filename:
-            class_id = 16
-        elif 'Mailbox' in annotation_filename:
-            class_id = 17
-        elif 'Manhole' in annotation_filename:
-            class_id = 18
-        elif 'Phone_Booth' in annotation_filename:
-            class_id = 19
-        elif 'Street_Light' in annotation_filename:
-            class_id = 20
-        elif 'Pole' in annotation_filename:
-            class_id = 21
-        elif 'Traffic_Sign_Frame' in annotation_filename:
-            class_id = 22
-        elif 'Utility_Pole' in annotation_filename:
-            class_id = 23
-        elif 'Traffic_Light' in annotation_filename:
-            class_id = 24
-        elif 'Traffic_Sign_(Back)' in annotation_filename:
-            class_id = 25
-        elif 'Traffic_Sign_(Front)' in annotation_filename:
-            class_id = 26
-        elif 'Trash_Can' in annotation_filename:
-            class_id = 27
-        elif 'Bicycle' in annotation_filename:
-            class_id = 28
-        elif 'Boat' in annotation_filename:
-            class_id = 29
-        elif 'Bus' in annotation_filename:
-            class_id = 30
-        elif 'Car' in annotation_filename:
-            class_id = 31
-        elif 'Caravan' in annotation_filename:
-            class_id = 32
-        elif 'Motorcycle' in annotation_filename:
-            class_id = 33
-        elif 'Other_Vehicle' in annotation_filename:
-            class_id = 34
-        elif 'Trailer' in annotation_filename:
-            class_id = 35
-        elif 'Truck' in annotation_filename:
-            class_id = 36
-        elif 'Wheeled_Slow' in annotation_filename:
-            class_id = 37 
-        segmentation_id = files.index(path_leaf(annotation_filename)))
-        category_info = {'id': class_id, 'is_crowd': 'crowd' in image_filename}
-        binary_mask = np.asarray(Image.open(annotation_filename)
-            .convert('1')).astype(np.uint8)
+def process_file(image_filename, image_files):
+    image_id = image_files.index(image_filename)
+    image = Image.open(image_filename)
+    image_info = pycococreatortools.create_image_info(
+        image_id, os.path.basename(image_filename), image.size)
+    coco_output["images"].append(image_info)
+    print(image_filename)
+    print(image_id)
+    # filter for associated png annotations
+    for root, _, files in os.walk(ANNOTATION_DIR):
+        annotation_files = filter_for_annotations(root, files, image_filename)
+        # go through each associated annotation
+        for annotation_filename in annotation_files:
+            # print(annotation_filename)
+            if 'Bird' in annotation_filename:
+                class_id = 1
+            elif 'Ground_Animal' in annotation_filename:
+                class_id = 2
+            elif 'Crosswalk_Plain' in annotation_filename:
+                class_id = 3
+            elif 'Person' in annotation_filename:
+                class_id = 4
+            elif 'Bicyclist' in annotation_filename:
+                class_id = 5
+            elif 'Motorcyclist' in annotation_filename:
+                class_id = 6
+            elif 'Other_Rider' in annotation_filename:
+                class_id = 7
+            elif 'Lane_Marking_-_Crosswalk' in annotation_filename:
+                class_id = 8
+            elif 'Banner' in annotation_filename:
+                class_id = 9
+            elif 'Bench' in annotation_filename:
+                class_id = 10
+            elif 'Bike_Rack' in annotation_filename:
+                class_id = 11
+            elif 'Billboard' in annotation_filename:
+                class_id = 12
+            elif 'Catch_Basin' in annotation_filename:
+                class_id = 13
+            elif 'CCTV_Camera' in annotation_filename:
+                class_id = 14
+            elif 'Fire_Hydrant' in annotation_filename:
+                class_id = 15
+            elif 'Junction_Box' in annotation_filename:
+                class_id = 16
+            elif 'Mailbox' in annotation_filename:
+                class_id = 17
+            elif 'Manhole' in annotation_filename:
+                class_id = 18
+            elif 'Phone_Booth' in annotation_filename:
+                class_id = 19
+            elif 'Street_Light' in annotation_filename:
+                class_id = 20
+            elif 'Pole' in annotation_filename:
+                class_id = 21
+            elif 'Traffic_Sign_Frame' in annotation_filename:
+                class_id = 22
+            elif 'Utility_Pole' in annotation_filename:
+                class_id = 23
+            elif 'Traffic_Light' in annotation_filename:
+                class_id = 24
+            elif 'Traffic_Sign_(Back)' in annotation_filename:
+                class_id = 25
+            elif 'Traffic_Sign_(Front)' in annotation_filename:
+                class_id = 26
+            elif 'Trash_Can' in annotation_filename:
+                class_id = 27
+            elif 'Bicycle' in annotation_filename:
+                class_id = 28
+            elif 'Boat' in annotation_filename:
+                class_id = 29
+            elif 'Bus' in annotation_filename:
+                class_id = 30
+            elif 'Car' in annotation_filename:
+                class_id = 31
+            elif 'Caravan' in annotation_filename:
+                class_id = 32
+            elif 'Motorcycle' in annotation_filename:
+                class_id = 33
+            elif 'Other_Vehicle' in annotation_filename:
+                class_id = 34
+            elif 'Trailer' in annotation_filename:
+                class_id = 35
+            elif 'Truck' in annotation_filename:
+                class_id = 36
+            elif 'Wheeled_Slow' in annotation_filename:
+                class_id = 37 
+            segmentation_id = files.index(path_leaf(annotation_filename))
+            category_info = {'id': class_id, 'is_crowd': 'crowd' in image_filename}
+            binary_mask = np.asarray(Image.open(annotation_filename)
+                .convert('1')).astype(np.uint8)
 
-        annotation_info = pycococreatortools.create_annotation_info(
-            segmentation_id, image_id, category_info, binary_mask,
-            imagesize, tolerance=2)
+            annotation_info = pycococreatortools.create_annotation_info(
+                segmentation_id, image_id, category_info, binary_mask,
+                imagesize, tolerance=2)
 
-        if annotation_info is not None:
-            coco_output["annotations"].append(annotation_info)
+            if annotation_info is not None:
+                coco_output["annotations"].append(annotation_info)
 
 def process_file_helper(args):
     process_file(*args)
@@ -346,26 +355,15 @@ def main():
         "annotations": []
     }
     pool = Pool()
-    image_id = 1
     np.set_printoptions(precision=8)
     # filter for jpeg images
     for root, _, files in os.walk(IMAGE_DIR):
         image_files = filter_for_jpeg(root, files)
-
+        
         # go through each image
-        for image_filename in image_files:
-            image = Image.open(image_filename)
-            image_info = pycococreatortools.create_image_info(
-                image_id, os.path.basename(image_filename), image.size)
-            coco_output["images"].append(image_info)
-            print(image_filename)
-            print(image_id)
-            # filter for associated png annotations
-            root, _, files = os.walk(ANNOTATION_DIR):
-            pool.map(process_file_helper, itertools.izip(files, 
-                itertools.repeat(root), itertools.repeat(image_filename), 
-                itertools.repeat(file_id), itertools.repeat(image.size)))
-            image_id = image_id + 1
+        pool.map(process_file_helper, itertools.izip(image_files, 
+        itertools.repeat(image_files)))
+
 
     with open('{}/instances_shape_train2018.json'.format(ROOT_DIR), 'w') as output_json_file:
         json.dump(coco_output, output_json_file)
