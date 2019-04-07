@@ -12,6 +12,8 @@ import numpy as np
 import scipy.misc
 from PIL import Image
 
+from multiprocessing import Pool, freeze_support
+import itertools
 
 def split_to_coco_creator(input_instance_array, labels):
 
@@ -59,10 +61,28 @@ def split_to_coco_creator(input_instance_array, labels):
 
     return labelid_matrix_name
 
+def process_file(file_name, dir_name, labels):
+    print("Task {}-{}".format(file_name,dir_name))
+    file_name = file_name[:-4]
+    instance_path = "{}/instances/{}.png".format(dir_name,file_name)
+    instance_image = Image.open(instance_path)
+    instance_array = np.array(instance_image, dtype=np.uint16)
+    image_label_instance_infomatrix = split_to_coco_creator(
+        instance_array, labels)
+
+    for item in image_label_instance_infomatrix:
+        path = "{}_{}_{}.png".format(
+            file_name, item["label_name"].replace(" ", "_"), item["instance_id"])
+        scipy.misc.imsave("{}/annotations/{}".format(dir_name,path), item["image"])
+
+def process_file_helper(args):
+    return process_file(*args)
 
 def split_dir(dir_name):
+    pool = Pool()
     print ("Spliting {}".format(dir_name))
-
+    if not os.path.exists("{}/annotations".format(dir_name)):
+        os.makedirs("{}/annotations".format(dir_name))
     dir_path = "{}/instances".format(dir_name)
     files = os.listdir(dir_path)
     # read in config file
@@ -70,20 +90,10 @@ def split_dir(dir_name):
         config = json.load(config_file)
 
     labels = config['labels']
-
-    for file_name in files:
-        print("Task {}-{}".format(cnt,dir_name))
-        file_name = file_name[:-4]
-        instance_path = "{}/instances/{}.png".format(dir_name,file_name)
-        instance_image = Image.open(instance_path)
-        instance_array = np.array(instance_image, dtype=np.uint16)
-        image_label_instance_infomatrix = split_to_coco_creator(
-            instance_array, labels)
-
-        for item in image_label_instance_infomatrix:
-            path = "{}_{}_{}.png".format(
-                file_name, item["label_name"].replace(" ", "_"), item["instance_id"])
-            scipy.misc.imsave("{}/annotations/{}".format(dir_name,path), item["image"])
-
+    
+    pool.map(process_file_helper, itertools.izip(files, 
+        itertools.repeat(dir_name), itertools.repeat(labels)))
+        
 if __name__ == '__main__':
+    freeze_support()
     split_dir("training")
